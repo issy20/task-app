@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["linux-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator nestgraphql {
+  provider               = "node node_modules/prisma-nestjs-graphql"
+  output                 = "../src/@generated/prisma-nestjs-graphql"
+  fields_Validator_from  = "class-validator"
+  fields_Validator_input = true
+  decorate_1_type        = "CreateOne*Args"
+  decorate_1_field       = data
+  decorate_1_name        = ValidateNested
+  decorate_1_from        = "class-validator"
+  decorate_1_arguments   = "[]"
+  decorate_2_type        = "CreateOne*Args"
+  decorate_2_field       = data
+  decorate_2_from        = "class-transformer"
+  decorate_2_arguments   = "['() => {propertyType.0}']"
+  decorate_2_name        = Type
+}
+
+model User {
+  /// @Field(() => ID)
+  id                 String   @id @default(uuid())
+  /// @Validator.@IsEmail()
+  email              String   @unique
+  /// @Validator.IsNotEmpty()
+  name               String
+  /// @HideField()
+  /// @Validator.MinLength(8)
+  password           String
+  /// @HideFeild({input: true, output: true})
+  hashedRefreshToken String?
+  /// @HideFeild({input: true, output: true})
+  createdAt          DateTime @default(now())
+  /// @HideFeild({input: true, output: true})
+  updatedAt          DateTime @updatedAt
+  tasks              Task[]
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  title     String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
