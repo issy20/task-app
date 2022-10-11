@@ -1,3 +1,5 @@
+#!/bin/bash
+
 FROM --platform=linux/amd64 node:16-bullseye
 
 WORKDIR /app
