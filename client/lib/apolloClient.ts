@@ -41,9 +41,11 @@ const authLink = (token?: string) =>
 const link =
   typeof window === 'undefined'
     ? // ssr or sg
-      'http://api:3003/graphql'
+      process.env.NEXT_PUBLIC_SSR_GRAPHQL_URL
     : // csr
-      'http://localhost:3050/backend/graphql'
+      process.env.NEXT_PUBLIC_CSR_GRAPHQL_URL
+
+// const link = 'http://api:3003/graphql'
 
 const httpLink = new HttpLink({
   uri: link, // Server URL (must be absolute)

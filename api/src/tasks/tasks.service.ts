@@ -1,4 +1,3 @@
-import { Task } from '.prisma/client';
 import { Injectable } from '@nestjs/common';
 import { CreateOneTaskArgs } from '../@generated/prisma-nestjs-graphql/task/create-one-task.args';
 import { DeleteOneTaskArgs } from '../@generated/prisma-nestjs-graphql/task/delete-one-task.args';
@@ -6,6 +5,7 @@ import { FindFirstTaskArgs } from '../@generated/prisma-nestjs-graphql/task/find
 import { FindManyTaskArgs } from '../@generated/prisma-nestjs-graphql/task/find-many-task.args';
 import { FindUniqueTaskArgs } from '../@generated/prisma-nestjs-graphql/task/find-unique-task.args';
 import { PrismaService } from '../prisma.service';
+import { Task } from '.prisma/client';
 
 @Injectable()
 export class TasksService {

@@ -9,6 +9,7 @@ services:
       - '3000:3000'
     volumes:
       - ./client:/app
+    command: npm run dev
 
   api:
     container_name: api
@@ -23,6 +24,7 @@ services:
       - ./api:/app
     depends_on:
       - mysql
+    command: npm run start:dev
 
   mysql:
     container_name: mysql
@@ -49,7 +51,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     ports:
-      - '3050:80'
+      - '80:80'
 
 volumes:
   db-data:
