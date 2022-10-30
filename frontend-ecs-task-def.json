@@ -1,0 +1,37 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "task-app-front-container",
+      "image": "225176608006.dkr.ecr.ap-northeast-1.amazonaws.com/task-app-frontend",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/task-app-front-task",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "family": "task-app-front-task",
+  "taskRoleArn": "ecsTaskExecutionRole",
+  "executionRoleArn": "ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [],
+  "placementConstraints": [],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512"
+}
