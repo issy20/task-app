@@ -73,6 +73,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: create env file
+        run: |
+          cd api
+          touch .env
+          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
+          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+          echo JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} >> .env
+          echo PRISMA_BINARY_TARGETS=${{ secrets.PRISMA_BINARY_TARGETS }} >> .env
+          cd ..
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -85,6 +95,7 @@ jobs:
           cd api
           docker buildx build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . --platform=linux/amd64
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          cd ..
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
       - name: Fill in the new image ID in the Amazon ECS task definition
