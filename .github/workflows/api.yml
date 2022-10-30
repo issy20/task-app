@@ -44,7 +44,7 @@ env:
   CONTAINER_NAME:
     task-app-backend-container # set this to the name of the container in the
     # containerDefinitions section of your task definition
-  AWS_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:taskAppEcsRole # GitHub　Actions用に作成したIAMロールのARN
+  AWS_ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/taskAppEcsRole # GitHub　Actions用に作成したIAMロールのARN
 
 permissions:
   contents: read
