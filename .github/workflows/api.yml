@@ -73,14 +73,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: create env file
+      - name: Create env file
         run: |
           cd api
-          touch .env
+          touch .env.
           echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
-          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
-          echo JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} >> .env
-          echo PRISMA_BINARY_TARGETS=${{ secrets.PRISMA_BINARY_TARGETS }} >> .env
+          touch .env.production
+          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env.production
+          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env.production
+          echo JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }} >> .env.production
+          ls
           cd ..
 
       - name: Build, tag, and push image to Amazon ECR
