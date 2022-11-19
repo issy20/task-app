@@ -12,6 +12,7 @@ import { concatPagination } from '@apollo/client/utilities'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
 import { fetch } from 'cross-fetch'
+import 'cross-fetch/polyfill'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
@@ -19,22 +20,31 @@ let apolloClient: ApolloClient<NormalizedCacheObject> | null = null
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
-    graphQLErrors.forEach(({ message, locations, path }) =>
+    graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
       )
-    )
+    })
   if (networkError) console.error(`[Network error]: ${networkError}`)
 })
 
 const authLink = (token?: string) =>
   setContext((_, { headers }) => {
-    console.log(token, 'authLink')
-    return {
-      headers: {
-        ...headers,
-        Authorization: token ? `Bearer ${token}` : '',
-      },
+    if (typeof window !== 'undefined') {
+      const accessToken = localStorage.getItem('accessToken')
+      return {
+        headers: {
+          ...headers,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    } else {
+      return {
+        headers: {
+          ...headers,
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+      }
     }
   })
 
@@ -55,7 +65,6 @@ const httpLink = new HttpLink({
 function createApolloClient(token?: string) {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    // link: from([errorLink, httpLink(token)]),
     link: from([errorLink, authLink(token).concat(httpLink)]),
     cache: new InMemoryCache({
       typePolicies: {

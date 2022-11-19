@@ -6,15 +6,21 @@ import React, {
   useContext,
   useState,
 } from 'react'
+import { RecoilRoot, useSetRecoilState } from 'recoil'
 import {
+  CreateTaskMutation,
+  CreateTaskMutationVariables,
   CreateUserMutation,
   LoginMutation,
   LoginUserInput,
+  TaskCreateInput,
   UserCreateInput,
 } from '../graphql/generated/graphql'
+import { CREATE_TASK } from '../graphql/query/task'
 import { CREATE_USER, LOGIN } from '../graphql/query/user'
 import { initializeApollo } from '../lib/apolloClient'
-import { currentUserVar } from '../states/currentUser'
+import { currentUserState } from '../states/currentUser'
+// import { currentUserVar } from '../states/currentUser'
 
 interface Props {
   children: ReactNode
@@ -39,11 +45,12 @@ export const useAuth = () => {
 }
 
 export const useProvideAuth = () => {
-  const currentUser = useReactiveVar(currentUserVar)
+  // const currentUser = useReactiveVar(currentUserVar)
+  const setCurrentUser = useSetRecoilState(currentUserState)
 
   const getCurrentUser = async () => {
-    const currentUser = await fetch('/api/session')
-    return currentUser
+    const res = await fetch('/api/session')
+    return res
   }
 
   const signIn = async ({ email, password }: LoginUserInput) => {
@@ -57,7 +64,7 @@ export const useProvideAuth = () => {
     const user = result.data?.login.user
     const accessToken = result.data?.login.access_token
     const refreshToken = result.data?.login.refresh_token
-
+    localStorage.setItem('accessToken', accessToken!)
     const body = { user, accessToken, refreshToken }
 
     await fetch('/api/session', {
@@ -74,16 +81,16 @@ export const useProvideAuth = () => {
       variables: { name, email, password },
     })
 
-    console.log(result)
-
+    // login処理
     if (result.data?.createUser.id) {
       return signIn({ email: result.data.createUser.email, password })
     }
   }
 
   const signOut = async () => {
-    await fetch('/api/sessionLogout', { method: 'POST' })
-    currentUserVar(null)
+    await fetch('/api/sessionLogout', { method: 'POST' }).then(() =>
+      setCurrentUser(undefined)
+    )
   }
 
   return {

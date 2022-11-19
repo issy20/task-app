@@ -349,6 +349,14 @@ export type GetTasksQueryVariables = Exact<{
 
 export type GetTasksQuery = { allTask: Array<{ id: string, title: string, createdAt: any }> };
 
+export type CreateTaskMutationVariables = Exact<{
+  title: Scalars['String'];
+  id: Scalars['String'];
+}>;
+
+
+export type CreateTaskMutation = { createTask: { id: string, title: string, userId: string } };
+
 export type CreateUserMutationVariables = Exact<{
   email: Scalars['String'];
   name: Scalars['String'];
@@ -381,7 +389,7 @@ export type LogoutMutation = { logout: boolean };
 
 export const GetTasksDocument = gql`
     query GetTasks($userId: String!) {
-  allTask(where: {userId: {equals: $userId}}) {
+  allTask(where: {userId: {equals: $userId}}, orderBy: [{createdAt: desc}]) {
     id
     title
     createdAt
@@ -416,6 +424,42 @@ export function useGetTasksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<G
 export type GetTasksQueryHookResult = ReturnType<typeof useGetTasksQuery>;
 export type GetTasksLazyQueryHookResult = ReturnType<typeof useGetTasksLazyQuery>;
 export type GetTasksQueryResult = Apollo.QueryResult<GetTasksQuery, GetTasksQueryVariables>;
+export const CreateTaskDocument = gql`
+    mutation CreateTask($title: String!, $id: String!) {
+  createTask(data: {title: $title, user: {connect: {id: $id}}}) {
+    id
+    title
+    userId
+  }
+}
+    `;
+export type CreateTaskMutationFn = Apollo.MutationFunction<CreateTaskMutation, CreateTaskMutationVariables>;
+
+/**
+ * __useCreateTaskMutation__
+ *
+ * To run a mutation, you first call `useCreateTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTaskMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTaskMutation, { data, loading, error }] = useCreateTaskMutation({
+ *   variables: {
+ *      title: // value for 'title'
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCreateTaskMutation(baseOptions?: Apollo.MutationHookOptions<CreateTaskMutation, CreateTaskMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateTaskMutation, CreateTaskMutationVariables>(CreateTaskDocument, options);
+      }
+export type CreateTaskMutationHookResult = ReturnType<typeof useCreateTaskMutation>;
+export type CreateTaskMutationResult = Apollo.MutationResult<CreateTaskMutation>;
+export type CreateTaskMutationOptions = Apollo.BaseMutationOptions<CreateTaskMutation, CreateTaskMutationVariables>;
 export const CreateUserDocument = gql`
     mutation CreateUser($email: String!, $name: String!, $password: String!) {
   createUser(data: {email: $email, name: $name, password: $password}) {

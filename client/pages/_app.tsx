@@ -3,12 +3,17 @@ import type { AppProps } from 'next/app'
 import { ApolloProvider, useReactiveVar } from '@apollo/client'
 import { useApollo } from '../lib/apolloClient'
 import { AuthProvider, useAuth } from '../hooks/useAuth'
-import { currentUserVar } from '../states/currentUser'
+// import { currentUserVar } from '../states/currentUser'
 import { useEffect } from 'react'
+import { RecoilRoot, useRecoilState, useSetRecoilState } from 'recoil'
+import { currentUserState } from '../states/currentUser'
+import { useRouter } from 'next/router'
 
 function AppInit() {
-  const currentUser = useReactiveVar(currentUserVar)
+  // const currentUser = useReactiveVar(currentUserVar)
+  const [currentUser, setCurrentUser] = useRecoilState(currentUserState)
   const { getCurrentUser } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     ;(async () => {
@@ -16,33 +21,38 @@ function AppInit() {
         // サーバーへのリクエスト getCurrentUser
         const res = await getCurrentUser()
         const data = await res.json()
-        // console.log(data)
+        if (data.session.id == undefined) {
+          throw new Error('data is undefined')
+        }
         // ログインユーザーの情報が取得できたらグローバルステートにセット
-        currentUserVar({
-          id: data.session.user.id,
+        setCurrentUser({
+          id: data.session.id,
+          name: data.session.name,
           accessToken: data.session.accessToken,
           refreshToken: data.session.refreshToken,
         })
-        console.log(currentUser, 'success')
+        // console.log(currentUser, 'success')
       } catch {
         //　未ログイン時
-        currentUserVar(null)
-        console.log(currentUser, 'failed')
+        setCurrentUser(undefined)
+        // console.log(currentUser, 'failed')
       }
     })()
-  }, [])
+  }, [router.pathname])
   return null
 }
 
 function MyApp({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps)
   return (
-    <ApolloProvider client={apolloClient}>
+    <RecoilRoot>
       <AuthProvider>
-        <Component {...pageProps} />
-        <AppInit />
+        <ApolloProvider client={apolloClient}>
+          <Component {...pageProps} />
+          <AppInit />
+        </ApolloProvider>
       </AuthProvider>
-    </ApolloProvider>
+    </RecoilRoot>
   )
 }
 

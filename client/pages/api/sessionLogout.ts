@@ -4,7 +4,6 @@ import { LogoutMutation } from '../../graphql/generated/graphql'
 import { LOGOUT } from '../../graphql/query/user'
 import { initializeApollo } from '../../lib/apolloClient'
 import { extractSession } from '../../lib/extractSession'
-import { currentUserVar } from '../../states/currentUser'
 import { ApiHandler, SessionContent } from '../../type'
 
 interface HeadersType {
@@ -19,6 +18,7 @@ const sessionLogout: ApiHandler<SessionContent, {}> = async (req, res) => {
   const session = extractSession(cookies)
   const token = session?.refreshToken
   const client = initializeApollo(null, token)
+
   // console.log(session?.refreshToken)
   try {
     await client.mutate({
@@ -26,6 +26,8 @@ const sessionLogout: ApiHandler<SessionContent, {}> = async (req, res) => {
     })
     destroyCookie({ res }, 'session-access-token', { path: '/' })
     destroyCookie({ res }, 'session-refresh-token', { path: '/' })
+    destroyCookie({ res }, 'user-id', { path: '/' })
+    destroyCookie({ res }, 'user-name', { path: '/' })
     destroyCookie({ res }, 'user-data', { path: '/' })
     // currentUserVar(null)
     // console.log(currentUser)

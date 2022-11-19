@@ -1,23 +1,39 @@
-import { GetServerSideProps, NextPage } from 'next'
+import { NextPage } from 'next'
 import { Layout } from '../components/Layout'
-import { initializeApollo } from '../lib/apolloClient'
-import nookies from 'nookies'
-import { extractSession } from '../lib/extractSession'
-import {
-  GetTasksQuery,
-  GetTasksQueryVariables,
-  User,
-} from '../graphql/generated/graphql'
-import { GET_TASKS } from '../graphql/query/task'
+
+import { SessionType } from '../lib/extractSession'
+import { GetTasksQuery } from '../graphql/generated/graphql'
+import { CREATE_TASK, GET_TASKS } from '../graphql/query/task'
 import { useAuth } from '../hooks/useAuth'
 import { useRouter } from 'next/router'
+import React, { useState } from 'react'
+import { useMutation, useQuery } from '@apollo/client'
+import { useCurrentUser } from '../hooks/useCurrentUser'
+import { useRequireLogin } from '../hooks/useRequireLogin'
 
 interface Props {
   data: GetTasksQuery
-  user: User
+  session: SessionType
 }
 
-const Task: NextPage<Props> = ({ data, user }) => {
+export interface TaskCreateState {
+  title: string
+}
+
+const Task: NextPage<Props> = () => {
+  useRequireLogin()
+  const { isAuthChecking, currentUser } = useCurrentUser()
+
+  const [taskState, setTaskState] = useState<TaskCreateState>({
+    title: '',
+  })
+
+  const { data, error, loading } = useQuery<GetTasksQuery>(GET_TASKS, {
+    variables: {
+      userId: currentUser?.id,
+    },
+  })
+
   const { signOut } = useAuth()
   const router = useRouter()
 
@@ -25,12 +41,48 @@ const Task: NextPage<Props> = ({ data, user }) => {
     await signOut()
     router.push('/')
   }
+
+  const [createTaskMutation] = useMutation(CREATE_TASK, {
+    update(cache, { data: { createTaskMutation } }) {
+      const cacheId = cache.identify(createTaskMutation)
+      cache.modify({
+        fields: {
+          allTask(existingTasks, { toReference }) {
+            if (cacheId) return [toReference(cacheId), ...existingTasks]
+          },
+        },
+      })
+    },
+  })
+
+  const createOnSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault()
+
+    await createTaskMutation({
+      variables: { title: taskState.title, id: currentUser?.id },
+    })
+  }
+
+  if (isAuthChecking) return <div>ログイン情報を確認中…</div>
+
   return (
     <Layout>
-      <h1 className="text-md">{user.name}</h1>
+      <h1 className="text-md">{currentUser?.name}</h1>
       <h1 className="text-md">Task List</h1>
+      <form className="flex flex-col" onSubmit={createOnSubmit}>
+        <input
+          type="text"
+          className="bg-gray-100 rounded mt-2 px-2 py-1"
+          placeholder="task"
+          value={taskState.title}
+          onChange={(e) =>
+            setTaskState({ ...taskState, title: e.target.value })
+          }
+        />
+        <button className="bg-gray-100 rounded mt-4 px-2 py-1">Add Task</button>
+      </form>
       <ul>
-        {data.allTask.map((task) => (
+        {data?.allTask.map((task) => (
           <li key={task.id}>{task.title}</li>
         ))}
       </ul>
@@ -41,24 +93,3 @@ const Task: NextPage<Props> = ({ data, user }) => {
 }
 
 export default Task
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const cookies = nookies.get(ctx)
-  const session = extractSession(cookies)
-  const token = session?.accessToken
-  const userId = session?.user.id
-  const client = initializeApollo(null, token)
-  const res = await client.query<GetTasksQuery, GetTasksQueryVariables>({
-    query: GET_TASKS,
-    variables: {
-      userId,
-    },
-  })
-
-  return {
-    props: {
-      data: res.data,
-      user: session?.user,
-    },
-  }
-}

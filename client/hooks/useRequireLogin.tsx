@@ -1,8 +1,8 @@
-import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 import { useCurrentUser } from './useCurrentUser'
 
-export const useRequireLogin = () => {
+export function useRequireLogin() {
   const { isAuthChecking, currentUser } = useCurrentUser()
   const router = useRouter()
 

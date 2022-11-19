@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Home } from '../components/Home'
 
 import { useAuth } from '../hooks/useAuth'
+import { useRequireLogin } from '../hooks/useRequireLogin'
 
 export interface LoginStateType {
   email: string
@@ -17,13 +18,15 @@ export interface SignUpStateType {
 }
 
 const Index: NextPage = () => {
+  useRequireLogin()
+
   const router = useRouter()
   const { signIn, signUp } = useAuth()
 
   const [frag, setFrag] = useState(false)
   const [loginUser, setLoginUser] = useState<LoginStateType>({
-    email: 'test@example.com',
-    password: 'password12345',
+    email: '',
+    password: '',
   })
   const [signUpUser, setSignUpUser] = useState<SignUpStateType>({
     name: '',
@@ -37,9 +40,10 @@ const Index: NextPage = () => {
     router.push('/task')
   }
 
-  const signUpOnSubmit = (e: React.SyntheticEvent) => {
+  const signUpOnSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
-    signUp(signUpUser)
+    await signUp(signUpUser)
+    router.push('/task')
   }
 
   return (
@@ -57,7 +61,3 @@ const Index: NextPage = () => {
 }
 
 export default Index
-
-// test user
-// test@example.com
-// password12345

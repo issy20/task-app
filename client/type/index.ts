@@ -4,7 +4,15 @@ import { User } from '../graphql/generated/graphql'
 export interface SessionContent {
   accessToken: string
   refreshToken: string
-  user: User
+  id: string
+  name: string
+}
+
+export interface CurrentUser {
+  accessToken: string
+  refreshToken: string
+  id: string
+  name: string
 }
 
 export interface Request<T> extends NextApiRequest {
