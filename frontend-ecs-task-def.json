@@ -1,8 +1,8 @@
 {
   "containerDefinitions": [
     {
-      "name": "task-app-front-container",
-      "image": "225176608006.dkr.ecr.ap-northeast-1.amazonaws.com/task-app-frontend",
+      "name": "task-app-container-next-frontend",
+      "image": "225176608006.dkr.ecr.ap-northeast-1.amazonaws.com/task-app-frontend:dc33cd023d5b8bbb4eec4431e8f83ca7aad32e61",
       "cpu": 0,
       "portMappings": [
         {
@@ -18,16 +18,16 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/task-app-front-task",
+          "awslogs-group": "/ecs/task/frontend",
           "awslogs-region": "ap-northeast-1",
           "awslogs-stream-prefix": "ecs"
         }
       }
     }
   ],
-  "family": "task-app-front-task",
-  "taskRoleArn": "ecsTaskExecutionRole",
-  "executionRoleArn": "ecsTaskExecutionRole",
+  "family": "task-app-task-frontend",
+  "taskRoleArn": "ecs_task_execution_role",
+  "executionRoleArn": "ecs_task_execution_role",
   "networkMode": "awsvpc",
   "volumes": [],
   "placementConstraints": [],
