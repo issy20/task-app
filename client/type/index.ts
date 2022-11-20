@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { User } from '../graphql/generated/graphql'
 
 export interface SessionContent {
   accessToken: string
